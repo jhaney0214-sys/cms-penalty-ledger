@@ -50,3 +50,11 @@ jobs:
             exit 1
           fi
           echo "No skips."
+
+      # Every inline script against the Content-Security-Policy in
+      # docs/_headers: a hash out of date breaks the live page with no error
+      # anywhere but the visitor's console. Uses the published Action.
+      - name: Content-Security-Policy
+        uses: jhaney0214-sys/csp-hash-check@v1
+        with:
+          path: docs
