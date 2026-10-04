@@ -86,3 +86,18 @@ backfill with the captures included, rebuilds every facility page, and commits
 `docs/robots.txt` together. It logs `history NOT refreshed` and does nothing
 when `data/cms-archive/listing.json` is missing, because filling that cache is
 a 350 MB fetch a person should start.
+
+## Search Console (2026-10-04)
+
+The site is a URL-prefix property, `https://penalty-ledger.pages.dev/`,
+verified by `docs/google98a61bb390f0a791.html`. **Never delete that file**:
+Google re-checks it and drops verification when it goes. The weekly rebuild
+prunes only facility and state pages, so it survives. A Domain property is
+impossible here, since `pages.dev` DNS is Cloudflare's.
+
+Cloudflare Pages answers any `.html` URL with a 308 to the bare path. Google
+followed it and verified. A deploy check with plain `curl -s` reads the empty
+308 body and reports the file missing (it did, for five minutes, on
+2026-10-04): use `curl -sL`. The sitemap (12,428 URLs) showed "Couldn't
+fetch" right after submission while serving 200 as XML; recheck before
+treating that as real.
