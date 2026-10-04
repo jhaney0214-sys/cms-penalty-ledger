@@ -135,8 +135,6 @@ class TestPage(unittest.TestCase):
             self.page.set_viewport_size({"width": 1280, "height": 900})
 
 
-if __name__ == "__main__":
-    unittest.main()
 
 
 class TestContentSecurityPolicy(unittest.TestCase):
@@ -154,3 +152,7 @@ class TestContentSecurityPolicy(unittest.TestCase):
                 digest = base64.b64encode(hashlib.sha256(block).digest()).decode()
                 self.assertIn("'sha256-%s'" % digest, headers,
                               "%s: an inline script changed; update its hash in docs/_headers" % page.name)
+
+
+if __name__ == "__main__":
+    unittest.main()
