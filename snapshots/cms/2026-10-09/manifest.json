@@ -1,0 +1,66 @@
+{
+  "captured": "2026-10-09",
+  "files": [
+    {
+      "archived": true,
+      "bytes": 96713,
+      "filename": "NH_CitationDescriptions_Sep2026_2.csv",
+      "identifier": "tagd-9999",
+      "modified": "2026-09-30",
+      "name": "citation_codes",
+      "rows": 643,
+      "sha256": "063ad15eeb92aad2d65d44995be5cb6220dab715cc01437e43b694e9c218f6c8",
+      "status": "unchanged",
+      "title": "Citation Code Look-up",
+      "url": "https://data.cms.gov/provider-data/sites/default/files/resources/a287029babaa02156654fca375b43f5d_1790792152/NH_CitationDescriptions_Sep2026_2.csv"
+    },
+    {
+      "archived": false,
+      "bytes": 69292951,
+      "filename": "NH_FireSafetyCitations_Sep2026_2.csv",
+      "identifier": "ifjz-ge4w",
+      "modified": "2026-09-30",
+      "name": "fire_safety_deficiencies",
+      "status": "manifest_only",
+      "title": "Fire Safety Deficiencies",
+      "url": "https://data.cms.gov/provider-data/sites/default/files/resources/98aa3596a9af76e285beb7aa7c7244d9_1790792146/NH_FireSafetyCitations_Sep2026_2.csv"
+    },
+    {
+      "archived": false,
+      "bytes": 165506420,
+      "filename": "NH_HealthCitations_Sep2026_2.csv",
+      "identifier": "r5ix-sfxw",
+      "modified": "2026-09-30",
+      "name": "health_deficiencies",
+      "status": "manifest_only",
+      "title": "Health Deficiencies",
+      "url": "https://data.cms.gov/provider-data/sites/default/files/resources/e7cd6855ef21902a6803f11dfa287fad_1790792147/NH_HealthCitations_Sep2026_2.csv"
+    },
+    {
+      "archived": true,
+      "bytes": 2666705,
+      "filename": "NH_Penalties_Sep2026_2.csv",
+      "identifier": "g6vv-u9sr",
+      "modified": "2026-09-30",
+      "name": "penalties",
+      "rows": 15419,
+      "sha256": "8f051ee5922cc1b1550b486a8844fa4bc0442172314456f858de7309a101900b",
+      "status": "new",
+      "title": "Penalties",
+      "url": "https://data.cms.gov/provider-data/sites/default/files/resources/c57d1c607447eab2d6e4073c953c9359_1790792149/NH_Penalties_Sep2026_2.csv"
+    },
+    {
+      "archived": true,
+      "bytes": 9973010,
+      "filename": "NH_SurveySummary_Sep2026_2.csv",
+      "identifier": "tbry-pc2d",
+      "modified": "2026-09-30",
+      "name": "survey_summary",
+      "rows": 43942,
+      "sha256": "d7bcf0c9f7cd51cc86943f810d4a7bdd181a5068b39be3bb77735ebe1e5d0473",
+      "status": "new",
+      "title": "Survey Summary",
+      "url": "https://data.cms.gov/provider-data/sites/default/files/resources/7bcd8cc13ae8d33954a4e0e2bfdcafb1_1790792151/NH_SurveySummary_Sep2026_2.csv"
+    }
+  ]
+}
