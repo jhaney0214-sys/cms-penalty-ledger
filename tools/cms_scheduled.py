@@ -211,6 +211,12 @@ def main():
             lines += republish()
         history, owed = history_step(wrote)
         lines += history
+        if history and not owed:
+            # The page's data counts what the history says was dropped, so it
+            # is exported again once the history has moved: on 2026-10-13 the
+            # facility pages ran through the October edition while the front
+            # page still said the history ended in August.
+            lines += republish()
         failed = any(r["status"] in ("fetch_failed", "unresolved")
                      for r in rows)
         code = 2 if failed else HISTORY_OWED if owed else 0
