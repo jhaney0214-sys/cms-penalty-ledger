@@ -118,10 +118,10 @@ The exporter computes everything through `tools/cms_ledger.py`, the command-line
 ## Tests
 
 ```bash
-python -m unittest discover -s tests     # 137 tests
+python -m unittest discover -s tests     # 143 tests
 ```
 
-**137 tests: 74 over the engine, 4 over the article's figures, 9 driving the page, 16 over the unattended run, 23 over the facility pages, 11 over the star-rating history.** *(This line said 88 until 2026-09-28; the facility pages' tests and three for the unattended run had landed without it. It said 130 until 2026-10-13: the 404 page's test had landed without it, and three were added that day for CMS renaming its archive number.)*
+**143 tests: 74 over the engine, 4 over the article's figures, 9 driving the page, 16 over the unattended run, 23 over the facility pages, 11 over the star-rating history, 6 over the chain count.** *(This line said 88 until 2026-09-28; the facility pages' tests and three for the unattended run had landed without it. It said 130 until 2026-10-13: the 404 page's test had landed without it, and three were added that day for CMS renaming its archive number.)*
 All 84 are in this repository as of 2026-09-19; 76 of them used to be in the
 workstation, which meant a clone could run 8.
 
@@ -136,6 +136,26 @@ numbers. They need Playwright (`pip install playwright`, then
 real hazard rather than a convenience, because a green `OK (skipped=8)` looks
 exactly like a suite that tested the page. CI installs chromium on purpose and
 fails the run if anything reports as skipped. The 71 engine tests need nothing.
+
+
+## Who runs a home: measured 2026-10-13, no page built
+
+A home's page says what that home was fined. It does not say who runs it or
+how their other homes have done. `python tools/chains.py` reads CMS's Provider
+Information file (processed 2026-09-01), which names a chain for each home
+that has one, against the penalty history:
+
+- 10,184 of 14,690 homes (69%) are in one of 611 chains, and every chain id
+  carries one name.
+- Homes in a chain average $119,194 in fines since 2016 and homes outside one
+  $88,330. Not adjusted for size or state, so it is a count, not a finding.
+- 86 homes changed owner in the last twelve months.
+
+**The limit that decides how a page would have to read:** the chain is
+today's. A 2019 fine is counted under whoever has the home now, and the
+provider file does not say when they got it. A chain page would have to say
+that on the page, and the per-chain totals in the tool's output are
+unpublished for the same reason. Nothing under `docs/` reads this yet.
 
 ## Status
 

@@ -18,3 +18,6 @@ snapshots/cms/.last_run.log
 
 # Left by a run whose history refresh failed; the next run retries and removes it.
 snapshots/cms/.history_pending
+
+# The provider file's chain columns, fetched by chains.py; CMS's, re-fetchable.
+data/cms-provider/
