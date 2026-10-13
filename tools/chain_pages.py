@@ -13,7 +13,8 @@ Information file names a chain for about seven homes in ten.
 **The chain is today's.** CMS's file says which chain a home belongs to in
 the month it was published and nothing about when that began. A fine from
 2019 is listed under whoever has the home now, who may have bought it since.
-So no page here says a chain "was fined" anything: it says what the homes it
+(CMS does publish change-of-ownership dates in another dataset, which
+this does not read yet: see the README.) So no page here says a chain "was fined" anything: it says what the homes it
 has today were fined, and says that in the first paragraph, above the table.
 
 Chains are listed alphabetically, never ranked. A total is not a rate: a

@@ -193,6 +193,17 @@ in the sitemap; the weekly task does not fetch the provider file or rebuild
 them, so they would go stale monthly; and they have had no `publish-legal`
 review, which they need, since each one is a page about a named business.
 
+**The limit can probably be removed, and that was missed (found 2026-10-13).**
+"CMS does not say when a home joined a chain" is true of the Provider
+Information file and not of CMS. CMS publishes *Skilled Nursing Facility
+Change of Ownership* (data.cms.gov, quarterly): buyer, seller, kind of change
+and **effective date**, for changes since 2016-01-01, with a companion file
+of owners and the date each became associated with a home. With it a fine
+could be set against whoever had the home on the day, which is the page a
+reader actually wants and the one that would be fair to a chain. Not read
+yet: whether its keys join to the certification number used here was not
+confirmed. These pages should not go out before that is tried.
+
 ## Status
 
 **The page is live at `penalty-ledger.pages.dev`**, built by Cloudflare Pages
