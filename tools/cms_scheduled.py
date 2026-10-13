@@ -52,6 +52,9 @@ LIVE_META = "https://penalty-ledger.pages.dev/data/meta.json"
 #: Exit code when the page is behind the repository: not a failed capture,
 #: but a deploy nobody has done, and it must show in Task Scheduler.
 BEHIND = 3
+#: Exit code when the history and the facility pages did not follow a capture.
+HISTORY_OWED = 4
+PENDING = os.path.join(HERE, "snapshots", "cms", ".history_pending")
 
 
 def _git_in(cwd, *args):
@@ -153,6 +156,30 @@ def refresh_history(cache=None, backfill=None, pages=None, git=None, ratings=Non
                    % (len(entries), summary["last_edition"]), "history")
 
 
+def history_step(wrote, refresh=None, pending=None):
+    """(log lines, owed): refresh the history after a capture, or when owed.
+
+    The refresh used to run only in the run that wrote a capture. On
+    2026-10-09 it failed in that run (CMS had renamed a field), every later
+    run found nothing new and skipped it, and the pages would have stayed a
+    month behind until November with each run exiting 0. A failure now leaves
+    a marker beside the log, the next run tries again whether or not there is
+    a new capture, and the run's exit code says so until it succeeds."""
+    refresh = refresh or refresh_history
+    pending = pending or PENDING
+    if not wrote and not os.path.isfile(pending):
+        return [], False
+    lines = refresh()
+    if any("NOT refreshed" in line for line in lines):
+        os.makedirs(os.path.dirname(pending), exist_ok=True)
+        with open(pending, "w", encoding="utf-8") as handle:
+            handle.write("\n".join(lines) + "\n")
+        return lines, True
+    if os.path.isfile(pending):
+        os.remove(pending)
+    return lines, False
+
+
 def live_check(ledger=LEDGER, fetch=None):
     """(behind, log line): is the public page serving the repository's capture?
 
@@ -182,10 +209,11 @@ def main():
         if wrote:
             lines += commit_and_push(wrote)
             lines += republish()
-            lines += refresh_history()
+        history, owed = history_step(wrote)
+        lines += history
         failed = any(r["status"] in ("fetch_failed", "unresolved")
                      for r in rows)
-        code = 2 if failed else 0
+        code = 2 if failed else HISTORY_OWED if owed else 0
         behind, line = live_check()
         lines.append(line)
         if behind and code == 0:

@@ -15,3 +15,6 @@ snapshots/cms/.last_run.log
 
 # Wrangler's local cache names the deploying account.
 .wrangler/
+
+# Left by a run whose history refresh failed; the next run retries and removes it.
+snapshots/cms/.history_pending

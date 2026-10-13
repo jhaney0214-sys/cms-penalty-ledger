@@ -118,10 +118,10 @@ The exporter computes everything through `tools/cms_ledger.py`, the command-line
 ## Tests
 
 ```bash
-python -m unittest discover -s tests     # 134 tests
+python -m unittest discover -s tests     # 137 tests
 ```
 
-**134 tests: 74 over the engine, 4 over the article's figures, 9 driving the page, 13 over the unattended run, 23 over the facility pages, 11 over the star-rating history.** *(This line said 88 until 2026-09-28; the facility pages' tests and three for the unattended run had landed without it. It said 130 until 2026-10-13: the 404 page's test had landed without it, and three were added that day for CMS renaming its archive number.)*
+**137 tests: 74 over the engine, 4 over the article's figures, 9 driving the page, 16 over the unattended run, 23 over the facility pages, 11 over the star-rating history.** *(This line said 88 until 2026-09-28; the facility pages' tests and three for the unattended run had landed without it. It said 130 until 2026-10-13: the 404 page's test had landed without it, and three were added that day for CMS renaming its archive number.)*
 All 84 are in this repository as of 2026-09-19; 76 of them used to be in the
 workstation, which meant a clone could run 8.
 

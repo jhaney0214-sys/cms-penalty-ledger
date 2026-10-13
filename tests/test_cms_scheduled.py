@@ -141,6 +141,43 @@ class TestRefreshHistory(unittest.TestCase):
         self.assertEqual(git.calls, [])
 
 
+class TestHistoryStep(unittest.TestCase):
+    """A refresh that failed is owed until it succeeds, capture or no capture."""
+
+    FAILED = ["  history NOT refreshed: KeyError: 'id'"]
+    DONE = ["  committed and pushed history"]
+
+    def setUp(self):
+        self.root = tempfile.mkdtemp()
+        self.pending = os.path.join(self.root, "cms", ".history_pending")
+
+    def tearDown(self):
+        shutil.rmtree(self.root)
+
+    def test_nothing_new_and_nothing_owed_does_nothing(self):
+        called = []
+        lines, owed = cms_scheduled.history_step(
+            None, refresh=lambda: called.append(1) or self.DONE, pending=self.pending)
+        self.assertEqual((lines, owed, called), ([], False, []))
+
+    def test_a_failure_is_owed_and_tried_again_without_a_new_capture(self):
+        lines, owed = cms_scheduled.history_step(
+            "snapshots/cms/2026-10-09", refresh=lambda: self.FAILED, pending=self.pending)
+        self.assertTrue(owed)
+        self.assertTrue(os.path.isfile(self.pending))
+        # 2026-10-13: the next run found nothing new, and before this it stopped there.
+        lines, owed = cms_scheduled.history_step(
+            None, refresh=lambda: self.DONE, pending=self.pending)
+        self.assertEqual((lines, owed), (self.DONE, False))
+        self.assertFalse(os.path.isfile(self.pending))
+
+    def test_it_stays_owed_while_it_keeps_failing(self):
+        for _ in range(2):
+            _, owed = cms_scheduled.history_step(
+                None if _ else "x", refresh=lambda: self.FAILED, pending=self.pending)
+            self.assertTrue(owed)
+
+
 class TestLiveCheck(unittest.TestCase):
     """The page is uploaded by hand, so a pushed capture can leave it behind."""
 
