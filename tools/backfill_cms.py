@@ -393,12 +393,31 @@ def _cache_prefix(e):
 NONE_MARKER = "NONE"              # cached answer: this ZIP has no penalties
 
 
+def identified(entries):
+    """The listing with every archive's number under `id`.
+
+    CMS called it `id` until some day between 2026-09-28 and 2026-10-09 and
+    `nid` after, with the same numbers (9266 is still August 2026). Every
+    cached member is named by it, so the weekly task stopped refreshing the
+    history with `KeyError: 'id'` and nothing but its own log said so. An
+    entry with neither name is refused: guessing a number would file one
+    edition's penalties under another's."""
+    out = []
+    for e in entries:
+        number = e.get("id") or e.get("nid")
+        if not number:
+            raise ValueError("CMS archive entry carries no id or nid: %r"
+                             % (e.get("name") or e.get("url")))
+        out.append(dict(e, id=str(number)))
+    return out
+
+
 def listing(get=None):
     if get is None:
         req = urllib.request.Request(LISTING, headers={"User-Agent": AGENT})
         with urllib.request.urlopen(req, timeout=120) as resp:
-            return json.loads(resp.read())["data"]
-    return get(LISTING)
+            return identified(json.loads(resp.read())["data"])
+    return identified(get(LISTING))
 
 
 def _cached(e):
@@ -445,7 +464,7 @@ def fetch_all(offline=False, fetch=http_range, log=print):
         os.makedirs(CACHE, exist_ok=True)
         with open(saved, "w", encoding="utf-8") as fh:
             json.dump(raw_listing, fh)
-    entries = sorted(raw_listing, key=lambda e: (e["date"], e["url"]))
+    entries = sorted(identified(raw_listing), key=lambda e: (e["date"], e["url"]))
     out = []
     for e in entries:
         url = BASE + e["url"]

@@ -160,7 +160,7 @@ def fetch_all(offline=False, fetch=bf.http_range, log=print, entries=None):
     if entries is None:
         with open(os.path.join(bf.CACHE, "listing.json"), encoding="utf-8") as fh:
             entries = json.load(fh)
-    entries = sorted(entries, key=lambda e: (e["date"], e["url"]))
+    entries = sorted(bf.identified(entries), key=lambda e: (e["date"], e["url"]))
     os.makedirs(CACHE, exist_ok=True)
     out = []
     for e in entries:

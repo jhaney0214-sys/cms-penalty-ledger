@@ -200,6 +200,33 @@ class TestHistory(unittest.TestCase):
         self.assertEqual(sum(p["ccn"] == "1" for p in pens), 2)
 
 
+class TestListing(unittest.TestCase):
+
+    #: One entry as CMS served it on 2026-10-13, after `id` became `nid`.
+    RENAMED = {"name": "Theme: nursing-homes (2026-08-26)", "nid": "9266",
+               "identifier": None, "type": "theme", "theme": "nursing-homes",
+               "url": "/provider-data/sites/default/files/dataset-archives/"
+                      "unknown-type/nursing-homes_2026-08-26.zip",
+               "size": "34053466", "date": "2026-08-26", "access_level": "public"}
+
+    def test_the_renamed_field_finds_the_same_cached_edition(self):
+        was = dict(self.RENAMED, id="9266")
+        del was["nid"]
+        now, = bf.identified([self.RENAMED])
+        then, = bf.identified([was])
+        self.assertEqual(bf._cache_prefix(now), bf._cache_prefix(then))
+        self.assertTrue(bf._cache_prefix(now).endswith("2026-08-26__9266__"))
+
+    def test_the_listing_is_read_through_it(self):
+        entry, = bf.listing(get=lambda url: [self.RENAMED])
+        self.assertEqual(entry["id"], "9266")
+
+    def test_an_entry_with_no_number_is_refused_not_guessed(self):
+        nameless = {k: v for k, v in self.RENAMED.items() if k != "nid"}
+        with self.assertRaises(ValueError):
+            bf.identified([nameless])
+
+
 class TestBuild(unittest.TestCase):
 
     def entry(self, date):
