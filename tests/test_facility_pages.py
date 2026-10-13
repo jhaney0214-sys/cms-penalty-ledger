@@ -173,7 +173,8 @@ class Choosing(unittest.TestCase):
         self.assertIn("<loc>https://penalty-ledger.pages.dev/</loc>", text)
         self.assertIn("<loc>https://penalty-ledger.pages.dev/facilities/105407-siesta-key</loc>", text)
         self.assertIn("<loc>https://penalty-ledger.pages.dev/facilities/state-fl</loc>", text)
-        self.assertEqual(text.count("<lastmod>2026-08-26</lastmod>"), 4)
+        self.assertEqual(text.count("<lastmod>2026-08-26</lastmod>"), 5)   # with the download page
+        self.assertIn("<loc>https://penalty-ledger.pages.dev/data</loc>", text)
         self.assertNotIn(".html", text)
 
     def test_a_state_index_ranks_largest_first(self):

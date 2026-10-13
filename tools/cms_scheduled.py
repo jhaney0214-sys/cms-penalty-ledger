@@ -35,6 +35,7 @@ sys.path.insert(0, os.path.join(HERE, "tools"))
 
 import backfill_cms  # noqa: E402
 import cms_export  # noqa: E402
+import data_page  # noqa: E402
 import facility_pages  # noqa: E402
 import ratings_history  # noqa: E402
 import snapshot_cms  # noqa: E402
@@ -117,7 +118,7 @@ def republish(ledger=LEDGER, export=None, git=None):
 
 #: What a history refresh commits: the rebuilt history and the pages built on it.
 HISTORY_PATHS = ("snapshots/cms-archive", "snapshots/cms-ratings", "docs/facilities",
-                 "docs/sitemap.xml", "docs/robots.txt")
+                 "docs/sitemap.xml", "docs/robots.txt", "docs/data.html", "docs/download")
 
 
 def _ratings():
@@ -125,6 +126,14 @@ def _ratings():
     carry no ProviderInfo file, so it moves when CMS archives an edition."""
     if os.path.isdir(ratings_history.CACHE) and os.listdir(ratings_history.CACHE):
         ratings_history.run(log=lambda *a: None)
+
+
+def _pages():
+    """Every home's page, then the download page and its two files, which
+    must be the histories the pages were just built from."""
+    entries = facility_pages.build(every=True)
+    data_page.build()
+    return entries
 
 
 def refresh_history(cache=None, backfill=None, pages=None, git=None, ratings=None):
@@ -142,7 +151,7 @@ def refresh_history(cache=None, backfill=None, pages=None, git=None, ratings=Non
         return ["  history NOT refreshed: no archive cache at %s;"
                 " run tools/backfill_cms.py once by hand" % cache]
     backfill = backfill or (lambda: backfill_cms.run(log=lambda *a: None)[0])
-    pages = pages or (lambda: facility_pages.build(every=True))
+    pages = pages or _pages
     ratings = ratings or _ratings
     git = git or globals()["git"]
     try:

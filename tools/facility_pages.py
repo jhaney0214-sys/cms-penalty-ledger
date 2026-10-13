@@ -416,8 +416,8 @@ def state_index(state, entries, edition):
 
 def sitemap(pages, edition):
     """Clean URLs, as Cloudflare Pages serves them: /x.html redirects to /x."""
-    urls = ["%s/" % SITE] + ["%s/facilities/%s" % (SITE, p[:-5] if p.endswith(".html") else p)
-                             for p in pages]
+    urls = ["%s/" % SITE, "%s/data" % SITE] + [
+        "%s/facilities/%s" % (SITE, p[:-5] if p.endswith(".html") else p) for p in pages]
     body = "\n".join("<url><loc>%s</loc><lastmod>%s</lastmod></url>" % (html.escape(u), edition)
                      for u in urls)
     return ('<?xml version="1.0" encoding="UTF-8"?>\n'

@@ -43,6 +43,7 @@ import hashlib
 import io
 import json
 import os
+import re
 import sys
 import time
 
@@ -219,6 +220,52 @@ def build(fetched):
     return manifest, editions
 
 
+#: A home number a spreadsheet read as a number: "14E169" opened and saved
+#: becomes "1.40E+170". CMS's 2019-10-09 edition carries 101 of them.
+MANGLED = re.compile(r"^(BSd)BS.(BSd)(BSd)EBS+(BSd+)$".replace("BS", chr(92)))
+
+
+def unmangle(text):
+    """The six-character home numbers that could have been read as this
+    number: two digits, E, three digits. "1.40E+170" is 14E169; "9.00E+20"
+    could be 90E019 or 09E020, and both come back."""
+    m = MANGLED.match(text)
+    if not m:
+        return []
+    a, b, c, exponent = int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4))
+    out = []
+    if c == 0 and exponent >= 1:
+        out.append("%d%dE%03d" % (a, b, exponent - 1))
+    if b == 0 and c == 0:
+        out.append("0%dE%03d" % (a, exponent))
+    return [x for x in out if len(x) == 6]
+
+
+def repair(editions):
+    """Put a mangled home number back where exactly one home it could be is
+    known from another edition and missing from this one. Anything else is
+    left as CMS published it and counted. -> (editions, {edition: (repaired,
+    left)})."""
+    known = set()
+    for _, homes in editions:
+        known.update(c for c in homes if not MANGLED.match(c))
+    out, counts = [], {}
+    for date, homes in editions:
+        fixed, repaired, left = {}, 0, 0
+        for ccn, stars in homes.items():
+            could = [c for c in unmangle(ccn) if c in known and c not in homes]
+            if len(could) == 1 and could[0] not in fixed:
+                fixed[could[0]] = stars
+                repaired += 1
+            else:
+                fixed[ccn] = stars
+                left += bool(MANGLED.match(ccn))
+        out.append((date, fixed))
+        if repaired or left:
+            counts[date] = (repaired, left)
+    return out, counts
+
+
 def moved(editions):
     """{edition: (homes rated in both it and the one before, of those how many
     changed overall rating)}."""
@@ -292,12 +339,15 @@ def run(offline=False, log=print):
         # A hole would read as every home's rating stopping and restarting.
         raise SystemExit("%d archive(s) failed; nothing written. Re-run: %s"
                          % (len(failed), [m["archive_date"] for m in failed]))
+    editions, repaired = repair(editions)
     done = runs(editions)
     write_history(done)
     shifts = moved(editions)
     summary = {"built": time.strftime("%Y-%m-%d"), "editions": len(editions),
                "first_edition": editions[0][0], "last_edition": editions[-1][0],
-               "homes": len({r["ccn"] for r in done}), "runs": len(done)}
+               "homes": len({r["ccn"] for r in done}), "runs": len(done),
+               # Home numbers CMS published in scientific notation: put back, and left.
+               "ccn_repaired": {d: {"repaired": a, "left": b} for d, (a, b) in sorted(repaired.items())}}
     with open(os.path.join(OUT, "manifest.json"), "w", encoding="utf-8", newline="\n") as fh:
         json.dump({"summary": summary, "archives": manifest,
                    "moved": {d: {"compared": n, "changed": c} for d, (n, c) in shifts.items()}},

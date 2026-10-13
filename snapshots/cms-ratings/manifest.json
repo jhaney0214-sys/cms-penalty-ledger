@@ -846,7 +846,7 @@
    "archive_date": "2026-10-08",
    "homes": 14690,
    "member": "4pq5-n9py_2026-09-30_NH_ProviderInfo_Sep2026_3.csv",
-   "note": "fetched",
+   "note": "cache",
    "processed": "2026-09-01",
    "sha256": "378d76a43f89c132e6796ea97530a004beabd2b0aa6516833c5734fd99d1e2b0"
   },
@@ -890,12 +890,12 @@
    "compared": 15309
   },
   "2019-10-09": {
-   "changed": 3943,
-   "compared": 15201
+   "changed": 3969,
+   "compared": 15302
   },
   "2019-12-17": {
-   "changed": 783,
-   "compared": 15176
+   "changed": 788,
+   "compared": 15277
   },
   "2020-01-09": {
    "changed": 4118,
@@ -1196,10 +1196,16 @@
  },
  "summary": {
   "built": "2026-10-13",
+  "ccn_repaired": {
+   "2019-10-09": {
+    "left": 0,
+    "repaired": 101
+   }
+  },
   "editions": 85,
   "first_edition": "2019-01-17",
-  "homes": 16170,
+  "homes": 16069,
   "last_edition": "2026-10-08",
-  "runs": 327369
+  "runs": 327232
  }
 }

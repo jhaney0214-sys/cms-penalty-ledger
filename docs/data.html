@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Download the data: every CMS nursing-home penalty since 2016</title>
+<meta name="description" content="83,712 penalties against 13,976 nursing homes, 68,293 of which CMS no longer publishes, as one file with every column defined and a line to cite.">
+<link rel="stylesheet" href="facilities/style.css">
+<link rel="canonical" href="https://penalty-ledger.pages.dev/data">
+</head><body><main class="page">
+<p class="meta"><a href="./">Nursing Home Penalty Ledger</a> &rsaquo; The data</p>
+<h1>Download the data</h1>
+<p>Everything the pages on this site show comes from two files. Both are here whole, with what each column holds. They are built from the monthly editions the Centers for Medicare &amp; Medicaid Services publishes and then archives; CMS's current file keeps about three years, and these keep every edition back to January 2019.</p>
+<h2>Every penalty in CMS&#x27;s archive</h2>
+<p>One row for each penalty CMS has published against a nursing home, with the first and last edition that listed it and whether CMS still does.</p>
+<p><a href="download/penalties_history.csv.gz"><strong>penalties_history.csv.gz</strong></a> &middot; 83,712 rows &middot; 13,976 homes &middot; 1.7 MB, gzip-compressed CSV, UTF-8</p>
+<p>Penalties dated 2016-01-04 to 2026-08-17, through CMS's file of 2026-10-08. 74,199 are fines and 9,513 are payment denials. <strong>68,293 of the 83,712 are no longer in CMS's current file.</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>What it holds</th></tr></thead><tbody>
+<tr><td><code>ccn</code></td><td>CMS Certification Number of the home, six characters, zero-padded.</td></tr>
+<tr><td><code>name</code></td><td>The home&#x27;s name as CMS last published it with this penalty.</td></tr>
+<tr><td><code>address</code></td><td>Street address, as CMS published it.</td></tr>
+<tr><td><code>city</code></td><td>City.</td></tr>
+<tr><td><code>state</code></td><td>Two-letter state or territory code.</td></tr>
+<tr><td><code>zip</code></td><td>ZIP code.</td></tr>
+<tr><td><code>date</code></td><td>The penalty&#x27;s date in CMS&#x27;s file (YYYY-MM-DD).</td></tr>
+<tr><td><code>kind</code></td><td>Fine (a civil money penalty) or Payment Denial (a denial of payment for new admissions). The two are never summed.</td></tr>
+<tr><td><code>fine_id</code></td><td>CMS&#x27;s identifier for a fine, in editions that carry one; blank before CMS published it and for payment denials.</td></tr>
+<tr><td><code>amount</code></td><td>A fine&#x27;s amount in dollars, as last published. Blank for a payment denial.</td></tr>
+<tr><td><code>denial_start</code></td><td>The date a payment denial began. Blank for a fine.</td></tr>
+<tr><td><code>denial_days</code></td><td>The length of a payment denial in days, as last published. Blank for a fine.</td></tr>
+<tr><td><code>first_amount</code></td><td>The amount as FIRST published, when CMS later revised it; blank when it never changed.</td></tr>
+<tr><td><code>first_denial_days</code></td><td>The denial&#x27;s length as first published, when CMS later revised it.</td></tr>
+<tr><td><code>revisions</code></td><td>How many times CMS changed the amount or length while it listed the penalty.</td></tr>
+<tr><td><code>first_seen</code></td><td>The date of the first archived monthly edition that lists the penalty.</td></tr>
+<tr><td><code>last_seen</code></td><td>The date of the last archived edition, or weekly capture, that lists it.</td></tr>
+<tr><td><code>appearances</code></td><td>How many editions list it.</td></tr>
+<tr><td><code>gaps</code></td><td>How many times it left CMS&#x27;s file and came back.</td></tr>
+<tr><td><code>in_latest</code></td><td>yes if CMS&#x27;s latest file still lists it; no if CMS has stopped publishing it.</td></tr>
+</tbody></table></div>
+<p class="meta">SHA-256 <code>ec2b19438ae4095c1f4687c9718ef187b15e74476bf41a99fcdc0745b9623cdb</code></p>
+<h2>Star ratings, edition by edition</h2>
+<p>One row for each stretch of editions in which a home&#x27;s four ratings did not change.</p>
+<p><a href="download/ratings_history.csv.gz"><strong>ratings_history.csv.gz</strong></a> &middot; 327,232 rows &middot; 16,069 homes &middot; 1.8 MB, gzip-compressed CSV, UTF-8</p>
+<p>Editions 2019-01-17 to 2026-10-08.</p>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>What it holds</th></tr></thead><tbody>
+<tr><td><code>ccn</code></td><td>CMS Certification Number of the home.</td></tr>
+<tr><td><code>from_edition</code></td><td>The first archived monthly edition in this run of unchanged ratings.</td></tr>
+<tr><td><code>to_edition</code></td><td>The last edition in the run.</td></tr>
+<tr><td><code>editions</code></td><td>How many editions the run covers.</td></tr>
+<tr><td><code>overall</code></td><td>Overall star rating, 1 to 5; blank where CMS published none.</td></tr>
+<tr><td><code>inspection</code></td><td>Health inspection rating.</td></tr>
+<tr><td><code>quality</code></td><td>Quality measures rating.</td></tr>
+<tr><td><code>staffing</code></td><td>Staffing rating.</td></tr>
+<tr><td><code>in_latest</code></td><td>yes if the run reaches CMS&#x27;s latest archived edition.</td></tr>
+</tbody></table></div>
+<p class="meta">SHA-256 <code>e2ca0ae560d4a3476b5d8800539ad496a83cabb7bbef13aebf9f610d7beb0090</code></p>
+<h2>How to cite it</h2>
+<p>Nursing Home Penalty Ledger, penalty history through CMS's file of 2026-10-08, https://penalty-ledger.pages.dev/data. Built from the Centers for Medicare &amp; Medicaid Services' Provider Data Catalog and its archive of monthly editions (data.cms.gov).</p>
+<p>Give the date: the files grow each month, and a count quoted without one cannot be checked. For a single home, cite its page, which links each penalty to the CMS edition that carried it.</p>
+<h2>What it is, and what it is not</h2>
+<ul>
+<li>The facts are CMS's public record. This site arranges them and adds nothing: every row can be found in the CMS edition named by its <code>first_seen</code> date.</li>
+<li>A penalty CMS no longer publishes was not withdrawn or overturned by that. CMS's file is a rolling window, and a row leaves it by age.</li>
+<li>An amount can change while CMS lists it. <code>amount</code> is the last one published and <code>first_amount</code> the first; a source quoting either may be right.</li>
+<li>Fines and payment denials are different penalties and are never added together here.</li>
+<li>A star rating moves when a home changes and also when CMS changes its method. The file cannot tell the two apart.</li>
+<li>In CMS's edition of 2019-10-09, 101 home numbers were stored as numbers (<code>14E169</code> as <code>1.40E+170</code>). Each is restored here where exactly one home it could be is known from the editions on either side.</li>
+</ul>
+<p class="meta">Found an error? Open an issue at <a href="https://github.com/jhaney0214-sys/cms-penalty-ledger/issues">the repository</a>. The scripts that build both files are there too.</p>
+</main></body></html>

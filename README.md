@@ -118,10 +118,10 @@ The exporter computes everything through `tools/cms_ledger.py`, the command-line
 ## Tests
 
 ```bash
-python -m unittest discover -s tests     # 143 tests
+python -m unittest discover -s tests     # 153 tests
 ```
 
-**143 tests: 74 over the engine, 4 over the article's figures, 9 driving the page, 16 over the unattended run, 23 over the facility pages, 11 over the star-rating history, 6 over the chain count.** *(This line said 88 until 2026-09-28; the facility pages' tests and three for the unattended run had landed without it. It said 130 until 2026-10-13: the 404 page's test had landed without it, and three were added that day for CMS renaming its archive number.)*
+**143 tests: 74 over the engine, 4 over the article's figures, 9 driving the page, 16 over the unattended run, 23 over the facility pages, 14 over the star-rating history, 6 over the chain count, 7 over the download page.** *(This line said 88 until 2026-09-28; the facility pages' tests and three for the unattended run had landed without it. It said 130 until 2026-10-13: the 404 page's test had landed without it, and three were added that day for CMS renaming its archive number.)*
 All 84 are in this repository as of 2026-09-19; 76 of them used to be in the
 workstation, which meant a clone could run 8.
 
@@ -137,6 +137,28 @@ real hazard rather than a convenience, because a green `OK (skipped=8)` looks
 exactly like a suite that tested the page. CI installs chromium on purpose and
 fails the run if anything reports as skipped. The 71 engine tests need nothing.
 
+
+## The whole file, to download and cite (2026-10-13, branch `data-download`, not live)
+
+`python tools/data_page.py` writes `docs/data.html` and `docs/download/`: both
+history files whole, a definition of every column, each file's SHA-256, a line
+to cite and what the data is not. The page's counts are read from the files,
+a column with no definition stops the build, and a test fails if the committed
+page or downloads differ from what the histories give now. The weekly task
+rebuilds it with the home pages. The front page and the sitemap link it.
+
+**It is on a branch because a push to `main` is a deploy.** Merging
+`data-download` puts the page live on the next push, which the Friday task
+makes.
+
+**Found while writing the column definitions:** CMS's edition of 2019-10-09
+stores 101 home numbers as numbers (`14E169` as `1.40E+170`, a spreadsheet's
+doing). The ratings history therefore held 101 homes that never existed, each
+for one edition, and a one-edition hole in 101 real homes' histories.
+`ratings_history.repair` puts a number back where exactly one home it could
+be is known from the other editions and missing from that one: 101 of 101,
+none left, counted in the manifest. 44 home pages change by one row each.
+The same branch carries it.
 
 ## Who runs a home: measured 2026-10-13, no page built
 

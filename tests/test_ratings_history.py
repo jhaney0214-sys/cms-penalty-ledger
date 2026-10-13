@@ -101,5 +101,45 @@ class History(unittest.TestCase):
         self.assertEqual(rh.moved(eds), {"2020-02": (2, 1)})
 
 
+
+class MangledHomeNumbers(unittest.TestCase):
+    """CMS's 2019-10-09 edition carries 101 home numbers a spreadsheet read
+    as numbers: 14E169 arrived as 1.40E+170, so that home's history had a
+    hole and a home that never existed had one edition."""
+
+    def test_the_numbers_a_mangled_one_could_have_been(self):
+        self.assertEqual(rh.unmangle("1.40E+170"), ["14E169"])
+        self.assertEqual(rh.unmangle("9.00E+20"), ["90E019", "09E020"])
+        self.assertEqual(rh.unmangle("015009"), [])
+        self.assertEqual(rh.unmangle("14E169"), [])
+        self.assertEqual(rh.unmangle("1.45E+170"), [])      # no two-digit state gives this
+
+    def test_one_known_home_missing_from_the_edition_gets_it_back(self):
+        stars = ("5", "4", "5", "2")
+        editions = [("2019-09-09", {"14E169": stars, "015009": stars}),
+                    ("2019-10-09", {"1.40E+170": stars, "015009": stars}),
+                    ("2019-12-17", {"14E169": stars, "015009": stars})]
+        fixed, counts = rh.repair(editions)
+        self.assertEqual(sorted(fixed[1][1]), ["015009", "14E169"])
+        self.assertEqual(counts, {"2019-10-09": (1, 0)})
+        runs = [r for r in rh.runs(fixed) if r["ccn"] == "14E169"]
+        self.assertEqual(len(runs), 1)                       # one unbroken run, not three
+        self.assertEqual(runs[0]["n"], 3)
+
+    def test_a_number_that_fits_two_homes_or_none_is_left_and_counted(self):
+        stars = ("3", "3", "3", "3")
+        two = [("a", {"90E019": stars, "09E020": stars}), ("b", {"9.00E+20": stars})]
+        fixed, counts = rh.repair(two)
+        self.assertIn("9.00E+20", fixed[1][1])
+        self.assertEqual(counts, {"b": (0, 1)})
+        none = [("a", {"015009": stars}), ("b", {"1.40E+170": stars})]
+        self.assertEqual(rh.repair(none)[1], {"b": (0, 1)})
+        # The home is already in the edition under its own number: not overwritten.
+        both = [("a", {"14E169": stars}), ("b", {"14E169": stars, "1.40E+170": ("1", "1", "1", "1")})]
+        fixed, counts = rh.repair(both)
+        self.assertEqual(fixed[1][1]["14E169"], stars)
+        self.assertEqual(counts, {"b": (0, 1)})
+
+
 if __name__ == "__main__":
     unittest.main()
