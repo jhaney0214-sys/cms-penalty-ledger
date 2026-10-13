@@ -118,10 +118,10 @@ The exporter computes everything through `tools/cms_ledger.py`, the command-line
 ## Tests
 
 ```bash
-python -m unittest discover -s tests     # 153 tests
+python -m unittest discover -s tests     # 161 tests
 ```
 
-**143 tests: 74 over the engine, 4 over the article's figures, 9 driving the page, 16 over the unattended run, 23 over the facility pages, 14 over the star-rating history, 6 over the chain count, 7 over the download page.** *(This line said 88 until 2026-09-28; the facility pages' tests and three for the unattended run had landed without it. It said 130 until 2026-10-13: the 404 page's test had landed without it, and three were added that day for CMS renaming its archive number.)*
+**143 tests: 74 over the engine, 4 over the article's figures, 9 driving the page, 16 over the unattended run, 23 over the facility pages, 14 over the star-rating history, 6 over the chain count, 7 over the download page, 8 over the chain pages.** *(This line said 88 until 2026-09-28; the facility pages' tests and three for the unattended run had landed without it. It said 130 until 2026-10-13: the 404 page's test had landed without it, and three were added that day for CMS renaming its archive number.)*
 All 84 are in this repository as of 2026-09-19; 76 of them used to be in the
 workstation, which meant a clone could run 8.
 
@@ -177,7 +177,21 @@ that has one, against the penalty history:
 today's. A 2019 fine is counted under whoever has the home now, and the
 provider file does not say when they got it. A chain page would have to say
 that on the page, and the per-chain totals in the tool's output are
-unpublished for the same reason. Nothing under `docs/` reads this yet.
+unpublished for the same reason.
+
+**Chain pages, built 2026-10-13 on the branch `chain-pages`, held.**
+`python tools/chain_pages.py` writes `docs/chains/`: 611 pages and an index.
+Each opens with the limit above, before any figure; lists its homes with
+each one's fines, total, payment denials and earliest penalty; links a home
+that has a page; marks a home that changed owner in the last year; and says
+its figures are counts, not rates. The index is alphabetical and carries no
+dollar totals, so it cannot be read as a ranking. A test fails on any page
+that says a chain "was fined".
+
+What is not done, on purpose: the pages are linked from nowhere and are not
+in the sitemap; the weekly task does not fetch the provider file or rebuild
+them, so they would go stale monthly; and they have had no `publish-legal`
+review, which they need, since each one is a page about a named business.
 
 ## Status
 
