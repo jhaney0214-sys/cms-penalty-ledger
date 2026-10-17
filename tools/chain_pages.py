@@ -58,6 +58,19 @@ DATED = ("<strong>These are the homes CMS lists under this chain today.</strong>
          "to changes effective by %s) is not counted at all.")
 
 
+#: Sources, what the page is not, and where to report an error: the same
+#: terms as the facility pages (publish-legal, 2026-10-03 and 2026-10-17).
+FOOTER = ('<p class="meta">This page states records; it is not legal advice and makes no finding about the care '
+          "at any home or the conduct of any company. Sources, all public domain: CMS "
+          '<a href="https://data.cms.gov/provider-data/dataset/4pq5-n9py">Provider Information</a> (chain '
+          "names), CMS's monthly archive of the Provider Data Catalog (penalties), and "
+          '<a href="https://data.cms.gov/provider-characteristics/hospitals-and-other-facilities/'
+          'skilled-nursing-facility-change-of-ownership">Skilled Nursing Facility Change of Ownership</a> '
+          "(owner dates). Found an error? Open an issue at "
+          '<a href="https://github.com/jhaney0214-sys/cms-penalty-ledger/issues">the repository</a>; every '
+          "figure is checked against the CMS edition it comes from and corrected there.</p>")
+
+
 def page_name(chain_id, name):
     return "%s-%s.html" % (chain_id, facility_pages.slug(name))
 
@@ -173,6 +186,7 @@ def chain_page(chain, processed, pages, edition=None, latest=""):
               "has stopped publishing, so it has no page here.</p>" % (
                   e(processed), " Owner dates: CMS Skilled Nursing Facility Change of Ownership, edition %s."
                   % e(edition) if edition else ""),
+              FOOTER,
               "</main></body></html>"]
     return "\n".join(parts) + "\n"
 
@@ -196,7 +210,7 @@ def index_page(found, processed, edition=None, latest=""):
         parts.append('<tr><td><a href="%s">%s</a></td><td class="num">%d</td><td class="num">%d</td></tr>' % (
             e(page_name(c["id"], c["name"])[:-5]), e(facility_pages.display(c["name"])), t["homes"],
             t["penalised"]))
-    parts += ["</tbody></table></div>", "</main></body></html>"]
+    parts += ["</tbody></table></div>", FOOTER, "</main></body></html>"]
     return "\n".join(parts) + "\n"
 
 

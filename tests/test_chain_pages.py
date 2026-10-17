@@ -69,6 +69,13 @@ class ThePage(unittest.TestCase):
         self.assertIn("not a penalty against this chain's management", self.page)
         self.assertIn("counts, not rates", self.page)
 
+    def test_every_page_carries_its_sources_and_a_way_to_report_an_error(self):
+        for name in os.listdir(self.out):
+            text = open(os.path.join(self.out, name), encoding="utf-8").read()
+            self.assertIn("cms-penalty-ledger/issues", text, name)
+            self.assertIn("makes no finding about the care", text, name)
+            self.assertIn("skilled-nursing-facility-change-of-ownership", text, name)
+
     def test_no_page_says_a_chain_was_fined(self):
         for name in os.listdir(self.out):
             text = open(os.path.join(self.out, name), encoding="utf-8").read().lower()

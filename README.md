@@ -121,7 +121,7 @@ The exporter computes everything through `tools/cms_ledger.py`, the command-line
 python -m unittest discover -s tests     # 161 tests
 ```
 
-**168 tests: 74 over the engine, 4 over the article's figures, 9 driving the page, 16 over the unattended run, 23 over the facility pages, 14 over the star-rating history, 6 over the chain count, 7 over the download page, 15 over the chain pages and owner dates.** *(This line said 143 until 2026-10-17, when its own parts added to 161. This line said 88 until 2026-09-28; the facility pages' tests and three for the unattended run had landed without it. It said 130 until 2026-10-13: the 404 page's test had landed without it, and three were added that day for CMS renaming its archive number.)*
+**169 tests: 74 over the engine, 4 over the article's figures, 9 driving the page, 16 over the unattended run, 23 over the facility pages, 14 over the star-rating history, 6 over the chain count, 7 over the download page, 16 over the chain pages and owner dates.** *(This line said 143 until 2026-10-17 (then 168 for an hour), when its own parts added to 161. This line said 88 until 2026-09-28; the facility pages' tests and three for the unattended run had landed without it. It said 130 until 2026-10-13: the 404 page's test had landed without it, and three were added that day for CMS renaming its archive number.)*
 All 84 are in this repository as of 2026-09-19; 76 of them used to be in the
 workstation, which meant a clone could run 8.
 
@@ -218,8 +218,8 @@ predates its 2024 purchases. Each chain page now gives every home's
 current-owner date and counts earlier penalties apart, and says the split can
 be off both ways: a change inside one chain counts as a change, and a change
 the file does not hold (several Journey homes have none) is not counted. The
-file is Windows-1252, not UTF-8. Still not done: `publish-legal`, a link from
-anywhere, and the quarterly refresh.
+file is Windows-1252, not UTF-8. `publish-legal` run the same day (Publish reviews below). Still not
+done: a link from anywhere, the sitemap, and the quarterly refresh.
 
 ## Status
 
@@ -260,3 +260,19 @@ Not tagged for production. Making this repository public would run through
 | Leak audit | 313 hits for "Huntsville", all facility addresses in the national data, public since 2026-09-27 | note | Accepted: data, not a personal leak |
 
 This review is not legal advice.
+
+**2026-10-17, `publish-legal`, the chain pages (branch `chain-pages`, not deployed).**
+
+| Check | Finding | Severity | Done |
+|---|---|---|---|
+| Data | Provider Information, the archive and Change of Ownership are all CMS public-domain works (the last marked usa.gov government works); no owner names or addresses from the CHOW owner file are read | - | Checked |
+| Statements about named chains | Pages put today's chain against fines from before it owned the home: 27% of chained fine dollars, 94% at Journey Healthcare | stop | Fixed: current-owner date per home and earlier penalties counted apart (`de4c7bfe`) |
+| Same | The split can be off both ways (a change within one chain; a change the file lacks, as at several Journey homes), and "no change since 2016" overclaimed | fix | Said on every page; label is now "none in CMS's file" |
+| Same | No source links, no corrections route, no "no finding about care" line, all of which the facility pages carry | fix | Added to all 612 pages, links checked live (200), pinned by a test |
+| Same | The full total still appears before the since-owner figure, one paragraph below the caveat | note | Accepted: the caveat and the split sit above the table |
+| Advice | Read by families choosing a home: "counts, not rates" and no ranking already said | - | Checked |
+| Staleness | The weekly task does not rebuild these, so chain membership ages monthly and owner dates quarterly | fix before deploy | Not done: each page states its editions, but the pages must be rebuilt by the task before they go live |
+| Collecting, selling | Static pages; nothing collected or sold | - | Checked |
+| Author | Pen name; no real name in any page; the issues link is the repository's existing account, as on the live facility pages | note | Accepted as before |
+
+Not checked: whether every CMS chain name is the name the company uses, and the chain pages' security review (static, same template as the facility pages). This review is not legal advice.
