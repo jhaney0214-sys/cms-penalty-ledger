@@ -121,7 +121,7 @@ The exporter computes everything through `tools/cms_ledger.py`, the command-line
 python -m unittest discover -s tests     # 161 tests
 ```
 
-**143 tests: 74 over the engine, 4 over the article's figures, 9 driving the page, 16 over the unattended run, 23 over the facility pages, 14 over the star-rating history, 6 over the chain count, 7 over the download page, 8 over the chain pages.** *(This line said 88 until 2026-09-28; the facility pages' tests and three for the unattended run had landed without it. It said 130 until 2026-10-13: the 404 page's test had landed without it, and three were added that day for CMS renaming its archive number.)*
+**168 tests: 74 over the engine, 4 over the article's figures, 9 driving the page, 16 over the unattended run, 23 over the facility pages, 14 over the star-rating history, 6 over the chain count, 7 over the download page, 15 over the chain pages and owner dates.** *(This line said 143 until 2026-10-17, when its own parts added to 161. This line said 88 until 2026-09-28; the facility pages' tests and three for the unattended run had landed without it. It said 130 until 2026-10-13: the 404 page's test had landed without it, and three were added that day for CMS renaming its archive number.)*
 All 84 are in this repository as of 2026-09-19; 76 of them used to be in the
 workstation, which meant a clone could run 8.
 
@@ -203,6 +203,23 @@ could be set against whoever had the home on the day, which is the page a
 reader actually wants and the one that would be fair to a chain. Not read
 yet: whether its keys join to the certification number used here was not
 confirmed. These pages should not go out before that is tried.
+
+**Tried 2026-10-17: it joins, and the pages now carry it.** `python
+tools/ownership.py` fetches the newest edition (found by title in
+`data.cms.gov/data.json`, since each edition has its own dataset id) and keeps
+each home's latest effective date. The 2026-06-01 edition has 5,227 changes
+effective 2016-01-01 to 2026-02-01; `CCN - BUYER` is the certification number
+used here, and 5,171 of 5,225 homes join the provider file. All 86 homes the
+provider file marks "changed owner in the last 12 months" are in it. **27% of
+the fine dollars at chained homes ($325M of $1.21B) are dated before the
+home's latest change of owner**, and at 97 of the 611 chains more than half
+are. Journey Healthcare is the plainest case: $6.66M of its 33 homes' $7.06M
+predates its 2024 purchases. Each chain page now gives every home's
+current-owner date and counts earlier penalties apart, and says the split can
+be off both ways: a change inside one chain counts as a change, and a change
+the file does not hold (several Journey homes have none) is not counted. The
+file is Windows-1252, not UTF-8. Still not done: `publish-legal`, a link from
+anywhere, and the quarterly refresh.
 
 ## Status
 

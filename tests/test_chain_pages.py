@@ -11,6 +11,7 @@ HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(HERE, "tools"))
 
 import chain_pages  # noqa: E402
+import ownership  # noqa: E402
 
 
 def home(ccn, name, state, chain_id, chain, changed="N"):
@@ -54,7 +55,7 @@ class ThePage(unittest.TestCase):
         os.makedirs(self.facilities)
         open(os.path.join(self.facilities, "015009-alpha-home.html"), "w").close()
         self.out = os.path.join(self.tmp, "chains")
-        chain_pages.build(self.out, HOMES, HISTORY, self.facilities)
+        chain_pages.build(self.out, HOMES, HISTORY, self.facilities, since={})
         self.page = open(os.path.join(self.out, "7-north-group.html"), encoding="utf-8").read()
 
     def tearDown(self):
@@ -92,8 +93,71 @@ class ThePage(unittest.TestCase):
         self.assertNotIn("<care>", page.lower().replace("&lt;care&gt;", ""))
 
     def test_a_chain_that_has_gone_loses_its_page(self):
-        chain_pages.build(self.out, HOMES[:3], HISTORY, self.facilities)
+        chain_pages.build(self.out, HOMES[:3], HISTORY, self.facilities, since={})
         self.assertEqual(sorted(os.listdir(self.out)), ["7-north-group.html", "index.html"])
+
+
+class OwnerDates(unittest.TestCase):
+    """Alpha Home's current owner took over in 2020: its 2019 fine and 2021
+    denial straddle the date. Beta Home has no change in the file."""
+
+    SINCE = {"015009": "2020-06-01"}
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.out = os.path.join(self.tmp, "chains")
+        chain_pages.build(self.out, HOMES, HISTORY, os.path.join(self.tmp, "none"), since=self.SINCE,
+                          edition="2026-06-01")
+        self.page = open(os.path.join(self.out, "7-north-group.html"), encoding="utf-8").read()
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp)
+
+    def test_a_penalty_before_the_owner_took_over_is_counted_apart(self):
+        t = chain_pages.totals(chain_pages.gather(HOMES, HISTORY, self.SINCE)["7"])
+        self.assertEqual((t["earlier"], t["earlier_dollars"], t["dated"]), (1, 1000.0, 1))
+        self.assertEqual(t["dollars"], 1500.0)
+
+    def test_the_page_says_so_before_any_figure_and_names_the_edition(self):
+        self.assertLess(self.page.index("counted apart"), self.page.index("$1,500"))
+        self.assertIn("edition 2026-06-01", self.page)
+        self.assertIn("which leaves $500 in fines since", self.page)
+        self.assertIn("<td>2020-06-01</td>", self.page)
+        self.assertIn("1 ($1,000)", self.page)
+        self.assertIn("none in CMS's file", self.page)
+        self.assertIn("effective by 2020-06-01", self.page)
+
+    def test_still_no_page_says_a_chain_was_fined(self):
+        for name in os.listdir(self.out):
+            text = open(os.path.join(self.out, name), encoding="utf-8").read().lower()
+            self.assertNotIn("was fined", text, name)
+            self.assertIn("not a penalty against", text, name)
+
+
+class OwnershipFile(unittest.TestCase):
+
+    RAW = ('"ENROLLMENT ID - BUYER","CCN - BUYER","EFFECTIVE DATE","ORGANIZATION NAME - SELLER"\n'
+           'O1,15009,12/29/2020,A\nO2,015009,3/1/2023,B\nO3,055656,10/11/2023,C\xa0D\nO4,,1/1/2024,E\n')
+
+    def test_the_latest_change_per_home_is_kept_and_numbers_are_padded(self):
+        self.assertEqual(ownership.latest(self.RAW), {"015009": "2023-03-01", "055656": "2023-10-11"})
+
+    def test_a_missing_column_is_an_error(self):
+        with self.assertRaises(ValueError):
+            ownership.latest('"CCN","EFFECTIVE DATE"\n015009,1/1/2020\n')
+
+    def test_the_newest_edition_is_found_by_title_and_the_owner_file_is_not(self):
+        def ds(title, url):
+            return {"title": title, "distribution": [{"format": "API", "accessURL": "x"},
+                                                     {"downloadURL": url}]}
+        cat = {"dataset": [ds("Skilled Nursing Facility Change of Ownership : 2026-03-01", "a.csv"),
+                           ds("Skilled Nursing Facility Change of Ownership : 2026-06-01", "b.csv"),
+                           ds("Skilled Nursing Facility Change of Ownership - Owner Information : 2026-09-01",
+                              "c.csv")]}
+        self.assertEqual(ownership.newest(cat), ("2026-06-01", "b.csv"))
+
+    def test_no_cache_means_no_dates(self):
+        self.assertEqual(ownership.cached(os.path.join(tempfile.gettempdir(), "no-such-file.csv.gz")), ({}, None))
 
 
 if __name__ == "__main__":
