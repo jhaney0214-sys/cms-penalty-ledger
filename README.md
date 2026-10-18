@@ -146,7 +146,7 @@ exactly like a suite that tested the page. CI installs chromium on purpose and
 fails the run if anything reports as skipped. The 71 engine tests need nothing.
 
 
-## The whole file, to download and cite (2026-10-13, branch `data-download`, not live)
+## The whole file, to download and cite (built 2026-10-13, live at `/data`)
 
 `python tools/data_page.py` writes `docs/data.html` and `docs/download/`: both
 history files whole, a definition of every column, each file's SHA-256, a line
@@ -155,9 +155,10 @@ a column with no definition stops the build, and a test fails if the committed
 page or downloads differ from what the histories give now. The weekly task
 rebuilds it with the home pages. The front page and the sitemap link it.
 
-**It is on a branch because a push to `main` is a deploy.** Merging
-`data-download` puts the page live on the next push, which the Friday task
-makes.
+*(Status corrected 2026-10-18: this was built on the branch `data-download`
+because a push to `main` is a deploy. The branch has since been merged; it
+holds nothing `main` lacks, and `docs/data.html` is on `origin/main`, so the
+page is live at `penalty-ledger.pages.dev/data`.)*
 
 **Found while writing the column definitions:** CMS's edition of 2019-10-09
 stores 101 home numbers as numbers (`14E169` as `1.40E+170`, a spreadsheet's
@@ -168,7 +169,7 @@ be is known from the other editions and missing from that one: 101 of 101,
 none left, counted in the manifest. 44 home pages change by one row each.
 The same branch carries it.
 
-## Who runs a home: measured 2026-10-13, no page built
+## Who runs a home: measured 2026-10-13, chain pages live 2026-10-17
 
 A home's page says what that home was fined. It does not say who runs it or
 how their other homes have done. `python tools/chains.py` reads CMS's Provider
@@ -187,7 +188,7 @@ provider file does not say when they got it. A chain page would have to say
 that on the page, and the per-chain totals in the tool's output are
 unpublished for the same reason.
 
-**Chain pages, built 2026-10-13 on the branch `chain-pages`, held.**
+**Chain pages, built 2026-10-13 on the branch `chain-pages`; merged and live 2026-10-17** (merge `e7ab590f`, at `penalty-ledger.pages.dev/chains/`).
 `python tools/chain_pages.py` writes `docs/chains/`: 611 pages and an index.
 Each opens with the limit above, before any figure; lists its homes with
 each one's fines, total, payment denials and earliest penalty; links a home
@@ -196,8 +197,10 @@ its figures are counts, not rates. The index is alphabetical and carries no
 dollar totals, so it cannot be read as a ranking. A test fails on any page
 that says a chain "was fined".
 
-What is not done, on purpose: the pages are linked from nowhere and are not
-in the sitemap; the weekly task does not fetch the provider file or rebuild
+What was held back at first, until the 2026-10-17 merge did all three (the
+front page links the index, the sitemap lists every page, the weekly task
+rebuilds them with fresh provider and owner files, and the review below was
+done): the pages were linked from nowhere and were not in the sitemap; the weekly task does not fetch the provider file or rebuild
 them, so they would go stale monthly; and they have had no `publish-legal`
 review, which they need, since each one is a page about a named business.
 
@@ -269,7 +272,7 @@ Not tagged for production. Making this repository public would run through
 
 This review is not legal advice.
 
-**2026-10-17, `publish-legal`, the chain pages (branch `chain-pages`, not deployed).**
+**2026-10-17, `publish-legal`, the chain pages (on the branch `chain-pages` before the merge that put them live the same day).**
 
 | Check | Finding | Severity | Done |
 |---|---|---|---|
