@@ -91,6 +91,14 @@ the workstation for the incumbent check.
 | Every figure a written piece quotes | `python tools/findings.py` |
 | Both, unattended | Windows task *CMS nursing-home capture*, weekly, runs `tools/cms_scheduled.py` |
 
+**The unattended row was broken until 2026-10-17**: the task ran the Microsoft
+Store `python` placeholder, which exits 9009 (the 2026-10-16 run failed that way).
+Since 2026-10-17 it runs
+`C:\Users\Jhane\AppData\Local\Programs\Python\Launcher\py.exe` with the same
+argument and working directory, and a run that day returned 0 (CMS had published
+no edition since 2026-10-09). Read the task's last result and
+`snapshots/cms/.last_run.log` before trusting a quiet week.
+
 **These commands moved into this repository on 2026-09-19, and until then they
 were not here.** `cms_ledger.py`, `backfill_cms.py`, `cms_export.py`,
 `snapshot_cms.py` and `cms_scheduled.py` lived in a private workstation
