@@ -126,10 +126,10 @@ The exporter computes everything through `tools/cms_ledger.py`, the command-line
 ## Tests
 
 ```bash
-python -m unittest discover -s tests     # 153 tests
+python -m unittest discover -s tests     # 161 tests
 ```
 
-**143 tests: 74 over the engine, 4 over the article's figures, 9 driving the page, 16 over the unattended run, 23 over the facility pages, 14 over the star-rating history, 6 over the chain count, 7 over the download page.** *(This line said 88 until 2026-09-28; the facility pages' tests and three for the unattended run had landed without it. It said 130 until 2026-10-13: the 404 page's test had landed without it, and three were added that day for CMS renaming its archive number.)*
+**169 tests: 74 over the engine, 4 over the article's figures, 9 driving the page, 16 over the unattended run, 23 over the facility pages, 14 over the star-rating history, 6 over the chain count, 7 over the download page, 16 over the chain pages and owner dates.** *(This line said 143 until 2026-10-17 (then 168 for an hour), when its own parts added to 161. This line said 88 until 2026-09-28; the facility pages' tests and three for the unattended run had landed without it. It said 130 until 2026-10-13: the 404 page's test had landed without it, and three were added that day for CMS renaming its archive number.)*
 All 84 are in this repository as of 2026-09-19; 76 of them used to be in the
 workstation, which meant a clone could run 8.
 
@@ -185,7 +185,49 @@ that has one, against the penalty history:
 today's. A 2019 fine is counted under whoever has the home now, and the
 provider file does not say when they got it. A chain page would have to say
 that on the page, and the per-chain totals in the tool's output are
-unpublished for the same reason. Nothing under `docs/` reads this yet.
+unpublished for the same reason.
+
+**Chain pages, built 2026-10-13 on the branch `chain-pages`, held.**
+`python tools/chain_pages.py` writes `docs/chains/`: 611 pages and an index.
+Each opens with the limit above, before any figure; lists its homes with
+each one's fines, total, payment denials and earliest penalty; links a home
+that has a page; marks a home that changed owner in the last year; and says
+its figures are counts, not rates. The index is alphabetical and carries no
+dollar totals, so it cannot be read as a ranking. A test fails on any page
+that says a chain "was fined".
+
+What is not done, on purpose: the pages are linked from nowhere and are not
+in the sitemap; the weekly task does not fetch the provider file or rebuild
+them, so they would go stale monthly; and they have had no `publish-legal`
+review, which they need, since each one is a page about a named business.
+
+**The limit can probably be removed, and that was missed (found 2026-10-13).**
+"CMS does not say when a home joined a chain" is true of the Provider
+Information file and not of CMS. CMS publishes *Skilled Nursing Facility
+Change of Ownership* (data.cms.gov, quarterly): buyer, seller, kind of change
+and **effective date**, for changes since 2016-01-01, with a companion file
+of owners and the date each became associated with a home. With it a fine
+could be set against whoever had the home on the day, which is the page a
+reader actually wants and the one that would be fair to a chain. Not read
+yet: whether its keys join to the certification number used here was not
+confirmed. These pages should not go out before that is tried.
+
+**Tried 2026-10-17: it joins, and the pages now carry it.** `python
+tools/ownership.py` fetches the newest edition (found by title in
+`data.cms.gov/data.json`, since each edition has its own dataset id) and keeps
+each home's latest effective date. The 2026-06-01 edition has 5,227 changes
+effective 2016-01-01 to 2026-02-01; `CCN - BUYER` is the certification number
+used here, and 5,171 of 5,225 homes join the provider file. All 86 homes the
+provider file marks "changed owner in the last 12 months" are in it. **27% of
+the fine dollars at chained homes ($325M of $1.21B) are dated before the
+home's latest change of owner**, and at 97 of the 611 chains more than half
+are. Journey Healthcare is the plainest case: $6.66M of its 33 homes' $7.06M
+predates its 2024 purchases. Each chain page now gives every home's
+current-owner date and counts earlier penalties apart, and says the split can
+be off both ways: a change inside one chain counts as a change, and a change
+the file does not hold (several Journey homes have none) is not counted. The
+file is Windows-1252, not UTF-8. `publish-legal` run the same day (Publish reviews below). Still not
+done: a link from anywhere, the sitemap, and the quarterly refresh.
 
 ## Status
 
@@ -226,3 +268,19 @@ Not tagged for production. Making this repository public would run through
 | Leak audit | 313 hits for "Huntsville", all facility addresses in the national data, public since 2026-09-27 | note | Accepted: data, not a personal leak |
 
 This review is not legal advice.
+
+**2026-10-17, `publish-legal`, the chain pages (branch `chain-pages`, not deployed).**
+
+| Check | Finding | Severity | Done |
+|---|---|---|---|
+| Data | Provider Information, the archive and Change of Ownership are all CMS public-domain works (the last marked usa.gov government works); no owner names or addresses from the CHOW owner file are read | - | Checked |
+| Statements about named chains | Pages put today's chain against fines from before it owned the home: 27% of chained fine dollars, 94% at Journey Healthcare | stop | Fixed: current-owner date per home and earlier penalties counted apart (`de4c7bfe`) |
+| Same | The split can be off both ways (a change within one chain; a change the file lacks, as at several Journey homes), and "no change since 2016" overclaimed | fix | Said on every page; label is now "none in CMS's file" |
+| Same | No source links, no corrections route, no "no finding about care" line, all of which the facility pages carry | fix | Added to all 612 pages, links checked live (200), pinned by a test |
+| Same | The full total still appears before the since-owner figure, one paragraph below the caveat | note | Accepted: the caveat and the split sit above the table |
+| Advice | Read by families choosing a home: "counts, not rates" and no ranking already said | - | Checked |
+| Staleness | The weekly task does not rebuild these, so chain membership ages monthly and owner dates quarterly | fix before deploy | Not done: each page states its editions, but the pages must be rebuilt by the task before they go live |
+| Collecting, selling | Static pages; nothing collected or sold | - | Checked |
+| Author | Pen name; no real name in any page; the issues link is the repository's existing account, as on the live facility pages | note | Accepted as before |
+
+Not checked: whether every CMS chain name is the name the company uses, and the chain pages' security review (static, same template as the facility pages). This review is not legal advice.
