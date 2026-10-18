@@ -141,6 +141,40 @@ class OwnerDates(unittest.TestCase):
             self.assertIn("not a penalty against", text, name)
 
 
+class WeeklyRefresh(unittest.TestCase):
+    """What the weekly task runs. A failure here must never reach the
+    facility pages, which are rebuilt in the same step."""
+
+    def test_a_fetch_that_fails_falls_back_to_the_cache_and_still_builds(self):
+        said = []
+
+        def down():
+            raise OSError("CMS did not answer")
+        built = chain_pages.refresh(fetch_chains=down, fetch_owners=down,
+                                    build_pages=lambda: {"7": {}, "9": {}}, log=said.append)
+        self.assertEqual(built, 2)
+        self.assertEqual(len(said), 2)
+        self.assertIn("using the cache", said[0])
+
+    def test_a_build_that_fails_is_logged_not_raised(self):
+        said = []
+
+        def broken():
+            raise FileNotFoundError("no provider file cached")
+        self.assertEqual(chain_pages.refresh(fetch_chains=lambda: None, fetch_owners=lambda: None,
+                                             build_pages=broken, log=said.append), 0)
+        self.assertIn("NOT rebuilt", said[0])
+
+    def test_the_task_commits_the_chain_pages_and_the_sitemap_lists_them(self):
+        import cms_scheduled
+        import facility_pages
+        self.assertIn("docs/chains", cms_scheduled.HISTORY_PATHS)
+        xml = facility_pages.sitemap([""], "2026-10-01", ["index.html", "7-north-group.html"])
+        self.assertIn("/chains/</loc>", xml)
+        self.assertIn("/chains/7-north-group</loc>", xml)
+        self.assertNotIn(".html</loc>", xml)
+
+
 class OwnershipFile(unittest.TestCase):
 
     RAW = ('"ENROLLMENT ID - BUYER","CCN - BUYER","EFFECTIVE DATE","ORGANIZATION NAME - SELLER"\n'

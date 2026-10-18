@@ -24,8 +24,9 @@ Chains are listed alphabetically, never ranked. A total is not a rate: a
 chain with 300 homes has more of everything than one with three, and no
 figure here is adjusted for size, state or the kind of resident.
 
-Written 2026-10-13 on the branch `chain-pages`. Not linked from any other
-page and not in the sitemap, and the weekly task does not build it.
+Written 2026-10-13 on the branch `chain-pages`. Since 2026-10-17 the weekly
+task rebuilds them (`refresh`) whenever it rebuilds the facility pages, the
+sitemap lists them and the front page links the index.
 """
 
 import collections
@@ -237,6 +238,28 @@ def build(out=OUT, homes=None, history=None, facilities=facility_pages.OUT, sinc
         if name not in keep and CHAIN_FILE.match(name):
             os.remove(os.path.join(out, name))
     return found
+
+
+def refresh(fetch_chains=None, fetch_owners=None, build_pages=None, log=print):
+    """What the weekly task runs: fetch CMS's provider file and the newest
+    change-of-ownership file, falling back to the cached copy of either when
+    CMS does not answer, then rebuild the pages. With no provider file cached
+    at all the pages are left as they are. Never raises: a chain failure must
+    not stop the facility pages. Returns the number of chain pages built."""
+    fetch_chains = fetch_chains or chains.fetch
+    fetch_owners = fetch_owners or ownership.fetch
+    build_pages = build_pages or build
+    for name, fetch in (("provider file", fetch_chains), ("owner dates", fetch_owners)):
+        try:
+            fetch()
+        except Exception as error:                                   # noqa: BLE001
+            log("  chain pages: %s not refreshed, using the cache (%s: %s)"
+                % (name, type(error).__name__, error))
+    try:
+        return len(build_pages())
+    except Exception as error:                                       # noqa: BLE001
+        log("  chain pages NOT rebuilt: %s: %s" % (type(error).__name__, error))
+        return 0
 
 
 if __name__ == "__main__":

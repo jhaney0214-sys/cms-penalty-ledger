@@ -34,6 +34,7 @@ HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(HERE, "tools"))
 
 import backfill_cms  # noqa: E402
+import chain_pages  # noqa: E402
 import cms_export  # noqa: E402
 import data_page  # noqa: E402
 import facility_pages  # noqa: E402
@@ -118,7 +119,8 @@ def republish(ledger=LEDGER, export=None, git=None):
 
 #: What a history refresh commits: the rebuilt history and the pages built on it.
 HISTORY_PATHS = ("snapshots/cms-archive", "snapshots/cms-ratings", "docs/facilities",
-                 "docs/sitemap.xml", "docs/robots.txt", "docs/data.html", "docs/download")
+                 "docs/chains", "docs/sitemap.xml", "docs/robots.txt", "docs/data.html",
+                 "docs/download")
 
 
 def _ratings():
@@ -129,8 +131,10 @@ def _ratings():
 
 
 def _pages():
-    """Every home's page, then the download page and its two files, which
-    must be the histories the pages were just built from."""
+    """The chain pages, then every home's page and the sitemap (which lists
+    the chain pages, so they go first), then the download page and its two
+    files, which must be the histories the pages were just built from."""
+    chain_pages.refresh(log=lambda *a: None)
     entries = facility_pages.build(every=True)
     data_page.build()
     return entries

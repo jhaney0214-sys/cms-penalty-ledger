@@ -414,10 +414,12 @@ def state_index(state, entries, edition):
     return "\n".join(parts) + "\n"
 
 
-def sitemap(pages, edition):
-    """Clean URLs, as Cloudflare Pages serves them: /x.html redirects to /x."""
+def sitemap(pages, edition, chains=()):
+    """Clean URLs, as Cloudflare Pages serves them: /x.html redirects to /x.
+    `chains` are the chain pages' file names, index.html among them."""
     urls = ["%s/" % SITE, "%s/data" % SITE] + [
-        "%s/facilities/%s" % (SITE, p[:-5] if p.endswith(".html") else p) for p in pages]
+        "%s/facilities/%s" % (SITE, p[:-5] if p.endswith(".html") else p) for p in pages] + [
+        "%s/chains/%s" % (SITE, "" if p == "index.html" else p[:-5]) for p in sorted(chains)]
     body = "\n".join("<url><loc>%s</loc><lastmod>%s</lastmod></url>" % (html.escape(u), edition)
                      for u in urls)
     return ('<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -471,7 +473,10 @@ def build(ccns=None, top=30, out=OUT, docs=DOCS, every=False):
             if name not in keep and (FACILITY_FILE.match(name) or name.startswith("state-")):
                 os.remove(os.path.join(out, name))
         pages = [""] + sorted(state_page(s) for s in by_state) + sorted(e["page"] for e in entries)
-        _write(os.path.join(docs, "sitemap.xml"), sitemap(pages, edition))
+        chain_dir = os.path.join(docs, "chains")
+        chains = sorted(n for n in os.listdir(chain_dir) if n.endswith(".html")) \
+            if os.path.isdir(chain_dir) else []
+        _write(os.path.join(docs, "sitemap.xml"), sitemap(pages, edition, chains))
         _write(os.path.join(docs, "robots.txt"), ROBOTS)
     return entries
 
