@@ -91,17 +91,13 @@ the workstation for the incumbent check.
 | Every figure a written piece quotes | `python tools/findings.py` |
 | Both, unattended | Windows task *CMS nursing-home capture*, weekly, runs `tools/cms_scheduled.py` |
 
-**The unattended row is broken as of 2026-10-16.** The task runs
-`C:\Users\Jhane\AppData\Local\Microsoft\WindowsApps\python.exe`, which is the
-Microsoft Store placeholder, not a Python: run by hand on 2026-10-16 it printed
-"Python was not found" and exited 9009. The task's last run (2026-10-09) returned
-3, and the next (2026-10-16 09:00) will fail the same way, so no edition is being
-captured unattended. Found while wrapping a session in which Farewatch's daily
-task, registered the same way, had been failing with 9009 (positive control). The
-fix is to point the task's program at the Python launcher,
-`C:\Users\Jhane\AppData\Local\Programs\Python\Launcher\py.exe`, keeping the same
-argument and working directory; it changes a Windows task, so it is the author's
-step. Remove this paragraph once a run returns 0.
+**The unattended row was broken until 2026-10-17**: the task ran the Microsoft
+Store `python` placeholder, which exits 9009 (the 2026-10-16 run failed that way).
+Since 2026-10-17 it runs
+`C:\Users\Jhane\AppData\Local\Programs\Python\Launcher\py.exe` with the same
+argument and working directory, and a run that day returned 0 (CMS had published
+no edition since 2026-10-09). Read the task's last result and
+`snapshots/cms/.last_run.log` before trusting a quiet week.
 
 **These commands moved into this repository on 2026-09-19, and until then they
 were not here.** `cms_ledger.py`, `backfill_cms.py`, `cms_export.py`,
