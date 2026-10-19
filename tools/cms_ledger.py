@@ -497,8 +497,13 @@ def state_report(capture, state):
         lines.append("  No payment denial recorded in this window.")
     if s["per_facility"]:
         lines += ["", "  Largest fine totals by facility:"]
-        ranked = sorted(s["per_facility"].items(), key=lambda kv: -kv[1])[:10]
         names = {p["ccn"]: p["name"] for p in capture.penalties}
+        # Equal totals in name order, as docs/ledger.js's largestFines breaks
+        # them (localeCompare, so case is ignored). Until 2026-10-19 they kept
+        # the order the rows arrived in; no state had a tie at tenth place, so
+        # the two agreed, but only because the data had not yet asked.
+        ranked = sorted(s["per_facility"].items(),
+                        key=lambda kv: (-kv[1], names.get(kv[0], "").casefold()))[:10]
         for ccn, total in ranked:
             lines.append("    %12s  %s  (CCN %s)"
                          % (_money(total), names.get(ccn, "?"), ccn))

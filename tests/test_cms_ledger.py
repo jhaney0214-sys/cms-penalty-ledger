@@ -160,6 +160,20 @@ class RefusesToSayMoreThanItKnows(LedgerTest):
         self.assertIn("3 facilities surveyed", text)
         self.assertIn(cms_ledger.NOT_CLEAN, text)
 
+    def test_equal_fine_totals_are_listed_by_name_as_the_page_lists_them(self):
+        # docs/ledger.js breaks a tie in largestFines by name; the report broke
+        # it by the order the rows arrived in (2026-10-19). Twelve facilities
+        # with one total, arriving in reverse name order, so the old rule would
+        # list the last-named first and cut different ones at tenth place.
+        names = ["FACILITY %s" % c for c in "LKJIHGFEDCBA"]
+        rows = [fine(ccn="0151%02d" % i, name=n, fine_id=str(900 + i), amount="5000")
+                for i, n in enumerate(names)]
+        surveys = [survey(ccn="0151%02d" % i, name=n) for i, n in enumerate(names)]
+        text = cms_ledger.state_report(self.one(rows, surveys=surveys), "AL")
+        import re
+        listed = re.findall(r"\d\s{2}(.+?)\s{2}\(CCN 0151", text)
+        self.assertEqual(listed, sorted(names)[:10])
+
     def test_an_unknown_state_says_so_rather_than_reporting_zeros(self):
         capture = self.one([fine()])
         text = cms_ledger.state_report(capture, "ZZ")
