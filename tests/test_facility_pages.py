@@ -188,6 +188,15 @@ class Choosing(unittest.TestCase):
         self.assertIn("<loc>https://penalty-ledger.pages.dev/data</loc>", text)
         self.assertNotIn(".html", "".join(parts.values()))
 
+    def test_the_front_page_count_follows_the_pages(self):
+        text = '<p><a href="facilities/">Full penalty histories for the 12,373 homes with fines</a></p>'
+        self.assertIn("for the 12,399 homes", facility_pages.main_page_count(text, 12399))
+        with self.assertRaises(SystemExit):
+            facility_pages.main_page_count("<p>Reworded.</p>", 12399)
+        live = os.path.join(facility_pages.DOCS, "index.html")
+        with open(live, encoding="utf-8") as handle:
+            facility_pages.main_page_count(handle.read(), 1)   # the sentence is still there
+
     def test_a_state_map_names_each_homes_page_by_its_ccn(self):
         entries = [{"page": "105407-siesta-key.html"}, {"page": "10A001-a-home.html"}]
         self.assertEqual(json.loads(facility_pages.page_map_json(entries)),

@@ -30,7 +30,7 @@ python tools/facility_pages.py              # the 30 with the most in dropped fi
 python tools/facility_pages.py --ccn 105407 # or named homes
 ```
 
-`--all` is what the live site carries since 2026-09-28: 12,373 pages, one per
+`--all` is what the live site carries since 2026-09-28 (12,373 pages then, 12,399 from the 2026-10-08 edition), one per
 home CMS inspects today with at least one fine its current file no longer
 shows, a page per state, and `docs/sitemap.xml` and `docs/robots.txt` so search
 engines can find them. Since 2026-10-24 `sitemap.xml` is an index of parts

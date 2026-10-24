@@ -478,6 +478,20 @@ def sitemaps(pages, edition, chains=(), per=4000):
 ROBOTS = "User-agent: *\nAllow: /\n\nSitemap: %s/sitemap.xml\n" % SITE
 
 
+MAIN_COUNT = re.compile(r"(Full penalty histories for the )[0-9,]+( homes)")
+
+
+def main_page_count(text, n):
+    """The front page's hand-written link names how many home pages exist. It
+    said 12,373 from 2026-09-28 while the weekly rebuild moved the pages to
+    12,399 on 10-13, found 10-24; so the build sets it, and refuses to build if
+    the sentence was reworded and no longer matches."""
+    fixed, found = MAIN_COUNT.subn(lambda m: m.group(1) + _count(n) + m.group(2), text)
+    if found != 1:
+        raise SystemExit("docs/index.html: the home-count sentence is missing; update MAIN_COUNT")
+    return fixed
+
+
 def _write(path, text):
     with open(path, "w", encoding="utf-8", newline="\n") as handle:
         handle.write(text)
@@ -535,6 +549,9 @@ def build(ccns=None, top=30, out=OUT, docs=DOCS, every=False):
         for name, text in written.items():
             _write(os.path.join(docs, name), text)
         _write(os.path.join(docs, "robots.txt"), ROBOTS)
+        main = os.path.join(docs, "index.html")
+        with open(main, encoding="utf-8") as handle:
+            _write(main, main_page_count(handle.read(), len(entries)))
     return entries
 
 
