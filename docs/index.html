@@ -223,7 +223,7 @@ async function largest(st) {
 function facilityView(f) {
   const m = Ledger.meta;
   let html = "<h2>" + esc(f.name) + "</h2><p class=\"muted\">" + esc(f.city) + ", " +
-    esc(stateName(f.state)) + ", CCN " + esc(f.ccn) + "</p>";
+    esc(stateName(f.state)) + ", CCN " + esc(f.ccn) + '</p><div id="history"></div>';
 
   html += "<h3>Penalties in CMS’s current window</h3>";
   if (!f.fines.length && !f.denials.length) {
@@ -268,6 +268,22 @@ function facilityView(f) {
 }
 const n = (v) => v == null ? "not given" : count(v);
 
+/* A home with a fine CMS no longer shows has its own page of every penalty
+   since 2019; the per-state map says which homes do. */
+async function fullHistory(f) {
+  const el = $("#history");   // taken now: a later view's #history is another home's
+  let pages;
+  try {
+    const r = await fetch("facilities/pages-" + encodeURIComponent(f.state.toLowerCase()) + ".json");
+    if (!r.ok) return;
+    pages = await r.json();
+  } catch (e) { return; }
+  const page = Object.prototype.hasOwnProperty.call(pages, f.ccn) ? pages[f.ccn] : null;
+  if (!el || !page) return;
+  el.innerHTML = '<p class="callout"><a href="facilities/' + esc(encodeURIComponent(page)) +
+    '">Every penalty CMS has published against this home since 2019</a>, including the fines its current file no longer shows, each tied to the edition that published it.</p>';
+}
+
 function basis() {
   const m = Ledger.meta;
   return "<p>Captured " + esc(m.capture) + " from CMS’s Provider Data Catalog, edition " + esc(m.edition) +
@@ -296,6 +312,7 @@ async function route() {
       out.innerHTML = f ? facilityView(f)
         : "<p>No facility with CCN <strong>" + esc(Ledger.normaliseCcn(h.get("ccn"))) +
           "</strong> is in this capture. That is different from a facility with no penalties: CMS’s files do not list this number at all.</p>";
+      if (f) fullHistory(f);
     } else if (h.get("q") || h.get("state")) {
       const q = h.get("q") || "", st = h.get("state") || "";
       $("#q").value = q; $("#st").value = st;

@@ -5,6 +5,7 @@ Built on rows shaped exactly like penalties_history.csv.gz, using Siesta Key's
 $799,880, three names, and penalties from before CMS's current window.
 """
 
+import json
 import os
 import sys
 import unittest
@@ -186,6 +187,13 @@ class Choosing(unittest.TestCase):
         self.assertEqual(text.count("<lastmod>2026-08-26</lastmod>"), 5)   # with the download page
         self.assertIn("<loc>https://penalty-ledger.pages.dev/data</loc>", text)
         self.assertNotIn(".html", "".join(parts.values()))
+
+    def test_a_state_map_names_each_homes_page_by_its_ccn(self):
+        entries = [{"page": "105407-siesta-key.html"}, {"page": "10A001-a-home.html"}]
+        self.assertEqual(json.loads(facility_pages.page_map_json(entries)),
+                         {"105407": "105407-siesta-key", "10A001": "10A001-a-home"})
+        self.assertEqual(facility_pages.page_map("FL"), "pages-fl.json")
+        self.assertRegex("pages-fl.json", facility_pages.PAGE_MAP_FILE)
 
     def test_the_sitemap_is_an_index_of_parts_split_by_kind(self):
         homes = ["%06d-home.html" % n for n in range(5)]

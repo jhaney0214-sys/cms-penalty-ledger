@@ -343,6 +343,22 @@ def state_page(state):
     return "state-%s.html" % state.lower()
 
 
+PAGE_MAP_FILE = re.compile(r"^pages-[a-z]{2}\.json$")
+
+
+def page_map(state):
+    return "pages-%s.json" % state.lower()
+
+
+def page_map_json(entries):
+    """{ccn: clean page name} for one state. The front page's search shows only
+    CMS's current window; until 2026-10-24 it never linked a home's full
+    history, so a visitor who searched never reached the dropped fines. It
+    fetches its home's state map (~10 KB) rather than all 12,000 names."""
+    return json.dumps({e["page"][:6]: clean(e["page"]) for e in sorted(entries, key=lambda e: e["page"])},
+                      separators=(",", ":")) + "\n"
+
+
 def clean(page):
     """A page's link as Cloudflare Pages serves it. Linking /x.html costs a 308
     to /x on every hop, so until 2026-10-24 a crawler reached all 12,000 homes
@@ -500,10 +516,13 @@ def build(ccns=None, top=30, out=OUT, docs=DOCS, every=False):
         by_state[e["state"]].append(e)
     for state, group in by_state.items():
         _write(os.path.join(out, state_page(state)), state_index(state, group, edition))
+        _write(os.path.join(out, page_map(state)), page_map_json(group))
     if every:
-        keep = {e["page"] for e in entries} | {state_page(s) for s in by_state}
+        keep = {e["page"] for e in entries} | {state_page(s) for s in by_state} | {
+            page_map(s) for s in by_state}
         for name in os.listdir(out):
-            if name not in keep and (FACILITY_FILE.match(name) or name.startswith("state-")):
+            if name not in keep and (FACILITY_FILE.match(name) or name.startswith("state-")
+                                     or PAGE_MAP_FILE.match(name)):
                 os.remove(os.path.join(out, name))
         pages = [""] + sorted(state_page(s) for s in by_state) + sorted(e["page"] for e in entries)
         chain_dir = os.path.join(docs, "chains")
