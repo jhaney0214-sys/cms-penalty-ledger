@@ -169,7 +169,8 @@ class WeeklyRefresh(unittest.TestCase):
         import cms_scheduled
         import facility_pages
         self.assertIn("docs/chains", cms_scheduled.HISTORY_PATHS)
-        xml = facility_pages.sitemap([""], "2026-10-01", ["index.html", "7-north-group.html"])
+        xml = facility_pages.sitemaps([""], "2026-10-01",
+                                      ["index.html", "7-north-group.html"])["sitemap-pages.xml"]
         self.assertIn("/chains/</loc>", xml)
         self.assertIn("/chains/7-north-group</loc>", xml)
         self.assertNotIn(".html</loc>", xml)

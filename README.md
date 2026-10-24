@@ -33,7 +33,10 @@ python tools/facility_pages.py --ccn 105407 # or named homes
 `--all` is what the live site carries since 2026-09-28: 12,373 pages, one per
 home CMS inspects today with at least one fine its current file no longer
 shows, a page per state, and `docs/sitemap.xml` and `docs/robots.txt` so search
-engines can find them. It removes pages for homes that have left the set. A
+engines can find them. Since 2026-10-24 `sitemap.xml` is an index of parts
+split by kind (`sitemap-pages.xml`, then `sitemap-homes-N.xml` of 4,000 each),
+so Search Console counts indexing per kind, and pages link clean URLs, never
+the `.html` form Cloudflare redirects. It removes pages for homes that have left the set. A
 page names the edition it was built through, not the day, so rebuilding
 without a new edition changes nothing.
 

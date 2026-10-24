@@ -164,24 +164,50 @@ class Choosing(unittest.TestCase):
 
     def test_a_page_links_its_state_and_names_its_clean_url(self):
         text = facility_pages.facility_page("105407", [row()], URLS, TODAY, "2026-09-27")
-        self.assertIn('<a href="state-fl.html">FL</a>', text)
+        self.assertIn('<a href="state-fl">FL</a>', text)
         self.assertIn('<link rel="canonical" href="https://penalty-ledger.pages.dev/facilities/'
                       '105407-siesta-key-health-and-rehabilitation-center">', text)
 
+    def test_no_page_links_a_url_that_redirects(self):
+        entries = [{"page": "105407-siesta-key.html", "name": "A", "city": "X", "state": "FL",
+                    "dollars": 1.0, "dropped": 1}]
+        for text in (facility_pages.index_page(entries, "2026-08-26"),
+                     facility_pages.state_index("FL", entries, "2026-08-26"),
+                     facility_pages.facility_page("105407", [row()], URLS, TODAY, "2026-09-27")):
+            self.assertNotRegex(text, r'href="[^":]*\.html"')
+        self.assertIn('href="105407-siesta-key"', facility_pages.state_index("FL", entries, "2026-08-26"))
+
     def test_the_sitemap_lists_clean_urls_dated_to_the_edition(self):
-        text = facility_pages.sitemap(["", "state-fl.html", "105407-siesta-key.html"], "2026-08-26")
+        parts = facility_pages.sitemaps(["", "state-fl.html", "105407-siesta-key.html"], "2026-08-26")
+        text = parts["sitemap-pages.xml"] + parts["sitemap-homes-1.xml"]
         self.assertIn("<loc>https://penalty-ledger.pages.dev/</loc>", text)
         self.assertIn("<loc>https://penalty-ledger.pages.dev/facilities/105407-siesta-key</loc>", text)
         self.assertIn("<loc>https://penalty-ledger.pages.dev/facilities/state-fl</loc>", text)
         self.assertEqual(text.count("<lastmod>2026-08-26</lastmod>"), 5)   # with the download page
         self.assertIn("<loc>https://penalty-ledger.pages.dev/data</loc>", text)
-        self.assertNotIn(".html", text)
+        self.assertNotIn(".html", "".join(parts.values()))
+
+    def test_the_sitemap_is_an_index_of_parts_split_by_kind(self):
+        homes = ["%06d-home.html" % n for n in range(5)]
+        parts = facility_pages.sitemaps([""] + homes, "2026-08-26", per=2)
+        self.assertEqual(sorted(parts), ["sitemap-homes-1.xml", "sitemap-homes-2.xml",
+                                         "sitemap-homes-3.xml", "sitemap-pages.xml", "sitemap.xml"])
+        index = parts["sitemap.xml"]
+        self.assertIn("<sitemapindex", index)
+        for name in parts:
+            if name != "sitemap.xml":
+                self.assertIn("<loc>https://penalty-ledger.pages.dev/%s</loc>" % name, index)
+                self.assertRegex(name, facility_pages.SITEMAP_PART)
+        self.assertNotRegex("sitemap.xml", facility_pages.SITEMAP_PART)   # never pruned
+        listed = "".join(v for k, v in parts.items() if k.startswith("sitemap-homes"))
+        self.assertEqual(listed.count("<url>"), 5)
+        self.assertNotIn("-home</loc>", parts["sitemap-pages.xml"])
 
     def test_a_state_index_ranks_largest_first(self):
         entries = [{"page": "a.html", "name": "A", "city": "X", "state": "FL", "dollars": 10.0, "dropped": 1},
                    {"page": "b.html", "name": "B", "city": "X", "state": "FL", "dollars": 99.0, "dropped": 2}]
         text = facility_pages.state_index("FL", entries, "2026-08-26")
-        self.assertLess(text.index('href="b.html"'), text.index('href="a.html"'))
+        self.assertLess(text.index('href="b"'), text.index('href="a"'))
         self.assertIn("largest first: 2.", text)
 
     def test_a_page_name_is_stable_and_safe(self):

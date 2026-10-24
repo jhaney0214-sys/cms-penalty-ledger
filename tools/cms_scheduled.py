@@ -119,7 +119,7 @@ def republish(ledger=LEDGER, export=None, git=None):
 
 #: What a history refresh commits: the rebuilt history and the pages built on it.
 HISTORY_PATHS = ("snapshots/cms-archive", "snapshots/cms-ratings", "docs/facilities",
-                 "docs/chains", "docs/sitemap.xml", "docs/robots.txt", "docs/data.html",
+                 "docs/chains", "docs/sitemap*.xml", "docs/robots.txt", "docs/data.html",
                  "docs/download")
 
 

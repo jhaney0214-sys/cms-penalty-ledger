@@ -294,7 +294,7 @@ def facility_page(ccn, history, urls, today, generated, ratings=None, moved=None
         '<link rel="canonical" href="%s/facilities/%s">' % (SITE, page_name(ccn, name)[:-5]),
         '</head><body><main class="page">',
         '<p class="meta"><a href="../">Nursing Home Penalty Ledger</a> &rsaquo; <a href="./">Homes</a>'
-        ' &rsaquo; <a href="%s">%s</a></p>' % (state_page(state), state),
+        ' &rsaquo; <a href="%s">%s</a></p>' % (clean(state_page(state)), state),
         "<h1>%s</h1>" % html.escape(display(name)),
         "<p>%s, %s &middot; CMS certification number %s</p>" % (html.escape(display(city)), state, ccn),
         "<p>%s</p>" % html.escape(summary, quote=False),
@@ -343,6 +343,13 @@ def state_page(state):
     return "state-%s.html" % state.lower()
 
 
+def clean(page):
+    """A page's link as Cloudflare Pages serves it. Linking /x.html costs a 308
+    to /x on every hop, so until 2026-10-24 a crawler reached all 12,000 homes
+    only through redirects (the chain pages already linked clean)."""
+    return page[:-5] if page.endswith(".html") else page
+
+
 def _head(title, description, canonical):
     return [
         "<!DOCTYPE html>",
@@ -359,7 +366,7 @@ def _head(title, description, canonical):
 def _table(entries):
     rows = "\n".join(
         '<tr><td><a href="%s">%s</a></td><td>%s, %s</td><td class="num">%d</td><td class="num">%s</td></tr>'
-        % (html.escape(e["page"]), html.escape(display(e["name"])), html.escape(display(e["city"])),
+        % (html.escape(clean(e["page"])), html.escape(display(e["name"])), html.escape(display(e["city"])),
            e["state"], e["dropped"], money(e["dollars"])) for e in entries)
     return ['<div class="table-wrap"><table><thead><tr><th>Home</th><th>Where</th>'
             '<th class="num">Fines no longer shown</th><th class="num">Total</th></tr></thead><tbody>',
@@ -384,7 +391,7 @@ def index_page(entries, edition, top=100):
         "it.</p>" % (_count(len(entries)), "" if len(entries) == 1 else "s",
                      "s" if len(entries) == 1 else "ve"),
         "<h2>By state</h2>",
-        "<p>%s</p>" % " &middot; ".join('<a href="%s">%s</a> (%s)' % (state_page(st), st, _count(n))
+        "<p>%s</p>" % " &middot; ".join('<a href="%s">%s</a> (%s)' % (clean(state_page(st)), st, _count(n))
                                         for st, n in sorted(states.items())),
     ]
     if len(ranked) > top:
@@ -414,16 +421,42 @@ def state_index(state, entries, edition):
     return "\n".join(parts) + "\n"
 
 
-def sitemap(pages, edition, chains=()):
-    """Clean URLs, as Cloudflare Pages serves them: /x.html redirects to /x.
-    `chains` are the chain pages' file names, index.html among them."""
-    urls = ["%s/" % SITE, "%s/data" % SITE] + [
-        "%s/facilities/%s" % (SITE, p[:-5] if p.endswith(".html") else p) for p in pages] + [
-        "%s/chains/%s" % (SITE, "" if p == "index.html" else p[:-5]) for p in sorted(chains)]
+def _urlset(urls, edition):
     body = "\n".join("<url><loc>%s</loc><lastmod>%s</lastmod></url>" % (html.escape(u), edition)
                      for u in urls)
     return ('<?xml version="1.0" encoding="UTF-8"?>\n'
             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n%s\n</urlset>\n' % body)
+
+
+SITEMAP_PART = re.compile(r"^sitemap-[a-z0-9-]+\.xml$")
+
+
+def sitemaps(pages, edition, chains=(), per=4000):
+    """{file name in docs/: text}: sitemap.xml is an index of the parts.
+    Clean URLs, as Cloudflare Pages serves them: /x.html redirects to /x.
+    `pages` are facility-folder file names ("" for its index), `chains` the
+    chain pages' file names, index.html among them.
+
+    One 1.7 MB urlset until 2026-10-24: Search Console said "Couldn't fetch"
+    for two weeks and never read it, though it served 200 as XML. Split by
+    kind, Search Console counts what it indexed per part, which says whether
+    Google takes the home pages or only the indexes. Parts sit beside the
+    index, since a sitemap may list only URLs under its own folder."""
+    index = [p for p in pages if not FACILITY_FILE.match(p)]
+    homes = [p for p in pages if FACILITY_FILE.match(p)]
+    parts = {"sitemap-pages.xml": ["%s/" % SITE, "%s/data" % SITE] + [
+        "%s/facilities/%s" % (SITE, clean(p)) for p in index] + [
+        "%s/chains/%s" % (SITE, "" if p == "index.html" else clean(p)) for p in sorted(chains)]}
+    for n, start in enumerate(range(0, len(homes), per), 1):
+        parts["sitemap-homes-%d.xml" % n] = [
+            "%s/facilities/%s" % (SITE, clean(p)) for p in homes[start:start + per]]
+    out = {name: _urlset(urls, edition) for name, urls in parts.items()}
+    out["sitemap.xml"] = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n%s\n</sitemapindex>\n'
+        % "\n".join("<sitemap><loc>%s/%s</loc><lastmod>%s</lastmod></sitemap>" % (SITE, name, edition)
+                    for name in parts))
+    return out
 
 
 ROBOTS = "User-agent: *\nAllow: /\n\nSitemap: %s/sitemap.xml\n" % SITE
@@ -476,7 +509,12 @@ def build(ccns=None, top=30, out=OUT, docs=DOCS, every=False):
         chain_dir = os.path.join(docs, "chains")
         chains = sorted(n for n in os.listdir(chain_dir) if n.endswith(".html")) \
             if os.path.isdir(chain_dir) else []
-        _write(os.path.join(docs, "sitemap.xml"), sitemap(pages, edition, chains))
+        written = sitemaps(pages, edition, chains)
+        for name in os.listdir(docs):
+            if SITEMAP_PART.match(name) and name not in written:
+                os.remove(os.path.join(docs, name))
+        for name, text in written.items():
+            _write(os.path.join(docs, name), text)
         _write(os.path.join(docs, "robots.txt"), ROBOTS)
     return entries
 
